@@ -42,27 +42,27 @@ void fatal(error *err) {
 /**
  * Returns true if the char is a Latin alphabetic's lowercase. Otherwise, returns false.
 */
-bool isLowercase(char token) {
-  return token >= 'a' && token <= 'z';
+bool isLowercase(char value) {
+  return value >= 'a' && value <= 'z';
 }
 
 /**
  * Returns true if the char is a Latin alphabetic's uppercase. Otherwise, returns false.
 */
-bool isUppercase(char token) {
-  return token >= 'A' && token <= 'Z';
+bool isUppercase(char value) {
+  return value >= 'A' && value <= 'Z';
 }
 
 /**
  * Returns the lowercase version of the received token if it is a character from the Latin alphabet.
  * Otherwise, it returns the same token unchanged.
 */
-char lowercase(char token) {
-  if ( isUppercase(token) ) {
-    return token + ('a' - 'A');
+char lowercase(char value) {
+  if ( isUppercase(value) ) {
+    return value + ('a' - 'A');
   }
 
-  return token;
+  return value;
 }
 
 /**
@@ -74,27 +74,27 @@ char lowercase(char token) {
 /**
  * Data struct to store one character frecuency and his replacement.
 */
-struct freqData {
-  char symbol;        // The character from message to decrypt.
+struct charFreqData {
+  char token;        // The character from message to decrypt.
   char replacement;   // The character to replace int the original message.
-  int freq;           // How often the token appears in the message.
+  int frequency;           // How often the token appears in the message.
 };
 
 /**
  * Models a element the character's frequency list.
  * Wraps a character frecuency data model.
 */
-struct freqNode {
-  freqNode *next;     // Points the next element in the list. Or NULL if is the last element.
-  freqData data;      // Stores the element value. Models the data about the character's frequency.
+struct charFreqNode {
+  charFreqNode *next;     // Points the next element in the list. Or NULL if is the last element.
+  charFreqData data;      // Stores the element value. Models the data about the character's frequency.
 };
 
 /**
  * Data struct to instance a character's frequency list.
 */
-struct freqList {
-  freqNode *start;    // References to the first element in the list. Values NULL if the list is empty.
-  freqNode *last;     // References to the last element in the list. Values NULL if the list is empty.
+struct charFreqList {
+  charFreqNode *head;    // References to the first element in the list. Values NULL if the list is empty.
+  charFreqNode *tail;     // References to the last element in the list. Values NULL if the list is empty.
                       // It's equal the first element if the list contains one element.
 };
 
@@ -104,31 +104,30 @@ struct freqList {
 
 /**
  * Appends a new element in the list.
- * The replacement value will starts empty.
  * Returns an error if the list isn't initialized.
 */
-error* append(freqList *list, char symbol, int freq) {
+error* charFreqList_Append(charFreqList *list, char token, int frequency, char replacement) {
   // Validates the list is initialized.
   if (list == NULL) {
     return errorf("failed to append a new symbol because list is empty");
   }
 
   // Instance an new element and loaded it.
-  freqNode *newNode = new freqNode;
-  newNode->data.symbol = symbol;
-  newNode->data.freq = freq;
-  newNode->data.replacement = 0;
+  charFreqNode *newNode = new charFreqNode;
+  newNode->data.token = token;
+  newNode->data.frequency = frequency;
+  newNode->data.replacement = replacement;
 
   // List empty.
-  if ( list->start == NULL ){
-    list->start = newNode;
-    list->last = list->start;
+  if ( list->head == NULL ){
+    list->head = newNode;
+    list->tail = list->head;
     return NULL;
   }
 
   // Translate the last reference at the new element.
-  list->last->next = newNode;
-  list->last = list->last->next;
+  list->tail->next = newNode;
+  list->tail = list->tail->next;
 
   return NULL;
 }
@@ -137,19 +136,19 @@ error* append(freqList *list, char symbol, int freq) {
  * Order the list of decreasing way.
  * Returns an error if the list isn't initialized or it hasn't nothing to order.
 */
-error *orderDecreasing(freqList *list) {
+error *charFreqList_SortDescending(charFreqList *list) {
 
-  if (list == NULL || list->start == NULL) {
+  if (list == NULL || list->head == NULL) {
     return errorf("could not possible order a empty freq list");
   }
 
-  freqNode *iter = list->start;
+  charFreqNode *iter = list->head;
   while ( iter != NULL ) {
 
-    freqNode *next = iter->next;
+    charFreqNode *next = iter->next;
     while (next != NULL) {
-      if ( next->data.freq > iter->data.freq ) {
-        freqData tmp = next->data;
+      if ( next->data.frequency > iter->data.frequency ) {
+        charFreqData tmp = next->data;
         next->data = iter->data;
         iter->data = tmp;
       }
@@ -167,14 +166,14 @@ error *orderDecreasing(freqList *list) {
  * if no match is found, returns NULL.
  * if the list isn't initilized or is empty, returns NULL.
 */
-freqNode *getNodeBySymbol(freqList *list, char symbol) {
-  if (list == NULL || list->start == NULL) {
+charFreqNode *charFreqList_GetElementByToken(charFreqList *list, char token) {
+  if (list == NULL || list->head == NULL) {
     return NULL;
   }
 
-  freqNode *iter = list->start;
+  charFreqNode *iter = list->head;
   do {
-    if (iter->data.symbol == symbol){
+    if (iter->data.token == token){
       return iter;
     }
 
@@ -187,17 +186,18 @@ freqNode *getNodeBySymbol(freqList *list, char symbol) {
 /**
  * Allows increasing the count of appearances of a token passed.
  * Search the token and increase its frequency in 1.
- * If the element there isn't in the list then, it appends this and set its frequency in 1.
+ * If the element there isn't in the list then,
+ * it appends this and set its frequency in 1 and its replacement token in char(0).
  * Returns an error if the list isn't initialized.
 */
-error* incFreq(freqList *list, char symbol) {
+error* charFreqList_IncreaseFrequency(charFreqList *list, char token) {
   if (list == NULL) {
     return errorf("failed to inc freq because list is empty");
   }
 
-  freqNode *foundNode = getNodeBySymbol(list, symbol);
+  charFreqNode *foundNode = charFreqList_GetElementByToken(list, token);
   if (foundNode == NULL){
-    error *err = append(list, symbol, 1);
+    error *err = charFreqList_Append(list, token, 1, 0);
     if (err != NULL) {
       return err;
     }
@@ -205,7 +205,7 @@ error* incFreq(freqList *list, char symbol) {
     return NULL;
   }
 
-  foundNode->data.freq++;
+  foundNode->data.frequency++;
 
   return NULL;
 }
@@ -218,7 +218,7 @@ error* incFreq(freqList *list, char symbol) {
  * Any token that does not match the letter of the Latin alphabet (a-z) will be stored unchanged.
  * Returns an error if the list isn't initialized.
 */
-error *getFreqMessage(freqList *list, const char *msg) {
+error *charFreqList_RefillFromMessage(charFreqList *list, const char *msg) {
 
   const int len = strlen(msg);
 
@@ -233,7 +233,7 @@ error *getFreqMessage(freqList *list, const char *msg) {
 
     char token = lowercase(msg[idx]);
 
-    error *err = incFreq(list, token);
+    error *err = charFreqList_IncreaseFrequency(list, token);
     if (err != NULL) {
       return err;
     }
@@ -256,10 +256,10 @@ error *getFreqMessage(freqList *list, const char *msg) {
  * 
  * This function allows the relationship between both tokens and stores them in the list.
 */
-void indexToken(freqList *list, const char *itable) {
-  freqNode *iter = list->start;
-  for (unsigned idx = 0; idx < strlen(itable) && iter != NULL; idx++) {
-    iter->data.replacement = itable[idx];
+void charFreqList_PopulateWithReplacementTokens(charFreqList *list, const char *tableLang) {
+  charFreqNode *iter = list->head;
+  for (unsigned idx = 0; idx < strlen(tableLang) && iter != NULL; idx++) {
+    iter->data.replacement = tableLang[idx];
     iter = iter->next;
   }
 }
@@ -268,27 +268,31 @@ void indexToken(freqList *list, const char *itable) {
  * Takes a list the character's frecuency populate with his respectives replacement tokens
  * and decode a message passed by parameters.
 */
-char *decodeMessage(freqList *list, const char* message) {
-  char *buffer = (char*) malloc(strlen(message));
-  strcpy(buffer, message);
-  buffer[strlen(message)] = '\0';
+char *decodeMessage(charFreqList *list, const char* message) {
+  char *decoded = (char*) malloc(strlen(message));
+  strcpy(decoded, message);
+  decoded[strlen(message)] = '\0';
 
-  freqNode *iter2 = list->start;
+  charFreqNode *iter2 = list->head;
   while (iter2 != NULL) {
+    // With each item listed I loop through the entire message...
     for (int idx = 0; idx < strlen(message); idx++){
-      if (lowercase(message[idx]) == iter2->data.symbol) {
+
+      // looking for matching tokens to replace.
+      if (lowercase(message[idx]) == iter2->data.token) {
+
+        // I replace maintaining the lower or upper case of the original message.
         if (isLowercase(message[idx])) {
-          buffer[idx] = lowercase(iter2->data.replacement);
+          decoded[idx] = lowercase(iter2->data.replacement);
         } else {
-          buffer[idx] = iter2->data.replacement;
+          decoded[idx] = iter2->data.replacement;
         }
-        
       }
     }
     iter2 = iter2->next;
   }
 
-  return buffer;
+  return decoded;
 }
 
 /**
@@ -296,19 +300,24 @@ char *decodeMessage(freqList *list, const char* message) {
  * and returns the message decrypted.
  * If an error is found then end the process inmeditly.
 */
-char *decryptMessage(const char *message, const char *f) {
+char *decryptMessage(const char *message, const char *tableLang) {
 
-  freqList *list = new freqList;
+  // Instances a new list to store the character frequencies.
+  charFreqList *list = new charFreqList;
   error *err = NULL;
   
-  err = getFreqMessage(list, message);
+  // Fill the list with the character frequencies from a message.
+  err = charFreqList_RefillFromMessage(list, message);
   fatal(err);
 
-  err = orderDecreasing(list);
+  // Sorts the list in descending way. The tokens most frequent will be first.
+  err = charFreqList_SortDescending(list);
   fatal(err);
 
-  indexToken(list, f);
+  // Indexes the list with the language character frequency table
+  charFreqList_PopulateWithReplacementTokens(list, tableLang);
 
+  // Uses the language character frequency table to decode the message.
   char *messageDecoded = decodeMessage(list, message);
 
   return messageDecoded;
