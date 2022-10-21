@@ -11,14 +11,17 @@ protected:
   char id;
 
   PieceBase(char id);
+
+public:
+  char ID();
 };
 
-class Piece: protected PieceBase
+class Piece : public PieceBase
 {
 public:
   Piece(char id);
 
-  virtual error* Draw() = 0;
+  virtual error *Draw() = 0;
 };
 
 #endif /* piece.h */
