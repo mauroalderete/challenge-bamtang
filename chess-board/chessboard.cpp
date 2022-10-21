@@ -5,38 +5,21 @@
 #include <unordered_map>
 #include "error/error.h"
 
-#include "piece/piece.h"
-#include "piece/piecefactory.h"
-#include "square/square.h"
-#include "square/squarefactory.h"
+#include "board/board.h"
+#include "drawers/console/board.h"
+#include "drawers/classic/board.h"
 
 error* drawChessBoard( const char *position ) {
 
-  PieceFactory *consolePieceFactory = new PieceFactory(console);
-  Piece *consoleKing = consolePieceFactory->CreatePiece('k');
-  consoleKing->Draw();
-
-  PieceFactory *classicPieceFactory = new PieceFactory(classic);
-  Piece *classicKing = classicPieceFactory->CreatePiece('K');
-  classicKing->Draw();
-
-  SquareFactory *consoleSquareFactory = new SquareFactory(console);
-  Square *consoleSquareWhite1 = consoleSquareFactory->CreateSquare('w');
-  consoleSquareWhite1->Put(consoleKing);
-  consoleSquareWhite1->Draw();
-  Square *consoleSquareBlack1 = consoleSquareFactory->CreateSquare('b');
-  consoleSquareBlack1->Put(consoleKing);
-  consoleSquareBlack1->Draw();
-
+  
+  Board *consoleBoard = new ConsoleBoard(8,8);
+  consoleBoard->Draw();
+  
   printf("\n");
 
-  Square *consoleSquareWhite2 = consoleSquareFactory->CreateSquare('w');
-  consoleSquareWhite1->Put(classicKing);
-  consoleSquareWhite1->Draw();
-  Square *consoleSquareBlack2 = consoleSquareFactory->CreateSquare('b');
-  consoleSquareBlack2->Put(classicKing);
-  consoleSquareBlack2->Draw();
-
+  Board *classicBoard = new ClassicBoard(8,8);
+  classicBoard->Draw();
+  
   printf("\n");
   return NULL;
 }
