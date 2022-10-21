@@ -5,7 +5,19 @@
 #include <unordered_map>
 #include "error/error.h"
 
+#include "piece/piece.h"
+#include "piece/piecefactory.h"
+
 error* drawChessBoard( const char *position ) {
+
+  PieceFactory *consolePieceFactory = new PieceFactory(console);
+  Piece *consoleKing = consolePieceFactory->CreatePiece('k');
+  consoleKing->Draw();
+
+  PieceFactory *classicPieceFactory = new PieceFactory(classic);
+  Piece *classicKing = classicPieceFactory->CreatePiece('k');
+  classicKing->Draw();
+
   return NULL;
 }
 
