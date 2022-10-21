@@ -7,6 +7,8 @@
 
 #include "piece/piece.h"
 #include "piece/piecefactory.h"
+#include "square/square.h"
+#include "square/squarefactory.h"
 
 error* drawChessBoard( const char *position ) {
 
@@ -15,9 +17,27 @@ error* drawChessBoard( const char *position ) {
   consoleKing->Draw();
 
   PieceFactory *classicPieceFactory = new PieceFactory(classic);
-  Piece *classicKing = classicPieceFactory->CreatePiece('k');
+  Piece *classicKing = classicPieceFactory->CreatePiece('K');
   classicKing->Draw();
 
+  SquareFactory *consoleSquareFactory = new SquareFactory(console);
+  Square *consoleSquareWhite1 = consoleSquareFactory->CreateSquare('w');
+  consoleSquareWhite1->Put(consoleKing);
+  consoleSquareWhite1->Draw();
+  Square *consoleSquareBlack1 = consoleSquareFactory->CreateSquare('b');
+  consoleSquareBlack1->Put(consoleKing);
+  consoleSquareBlack1->Draw();
+
+  printf("\n");
+
+  Square *consoleSquareWhite2 = consoleSquareFactory->CreateSquare('w');
+  consoleSquareWhite1->Put(classicKing);
+  consoleSquareWhite1->Draw();
+  Square *consoleSquareBlack2 = consoleSquareFactory->CreateSquare('b');
+  consoleSquareBlack2->Put(classicKing);
+  consoleSquareBlack2->Draw();
+
+  printf("\n");
   return NULL;
 }
 
