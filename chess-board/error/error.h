@@ -2,8 +2,8 @@
  * err.h implements a serie of struct and functions to manipulate expected errors.
 */
 
-#ifndef _ERR_H
-#define _ERR_H
+#ifndef _ERROR_H
+#define _ERROR_H
 
 /**
  * Implements a simple struct to manipulate errors.
