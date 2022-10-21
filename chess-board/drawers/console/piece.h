@@ -1,5 +1,5 @@
-#ifndef _CONSOLE_PIECES_H
-#define _CONSOLE_PIECES_H
+#ifndef _CONSOLE_PIECE_H
+#define _CONSOLE_PIECE_H
 
 #include <stdio.h>
 #include "../../error/error.h"
@@ -13,4 +13,4 @@ public:
   error* Draw() override;
 };
 
-#endif /* pieces.h */
+#endif /* piece.h */
